@@ -38,8 +38,8 @@ command = 'ifconfig %s| grep ether' % (sys.argv[1])
 returnValue = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 returnValue.wait()
 
-tuple = returnValue.communicate()
-currentMAC = shlex.split(tuple[0])[1]
+standardOutIn = returnValue.communicate()
+currentMAC = shlex.split(standardOutIn[0])[1]
 
 # Chop off the last six hexadecimal digits
 currentMACPrefix = currentMAC[0:9]
