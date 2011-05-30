@@ -68,7 +68,7 @@ command = 'sudo ifconfig %s ether %s' % (sys.argv[1], MACaddress)
 
 print command
 
-# Run the command 3 times (it seems to sometimes not stick, potential ifconfig race condition?)
+# Run the command 3 times (it seems to sometimes not stick, potential ifconfig issue?)
 
 subprocess.Popen(command, shell=True)
 time.sleep(1)
