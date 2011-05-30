@@ -3,7 +3,7 @@ spuuf, a MAC address changer for your Mac
 
 by Peter Hajas
 
-It doesn't totally work. Maybe you can fix it?
+Just run sudo python spuuf.py!
 
 It's BSD licensed!
 
