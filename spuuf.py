@@ -23,10 +23,9 @@
 
 # Just run "sudo python spuuf.py" and it'll take care of the rest!
 
-# It doesn't totally work. Maybe you can fix it?
-
 import subprocess
 import sys
+import shlex
 import time # probably the coolest thing I've ever written in software
 
 # Check arguments
@@ -34,8 +33,20 @@ if len(sys.argv) < 2:
   print "Please run spuuf with an interface argument, like en1 (most Macs) or en0 (MacBook Air)"
   quit()
 
-# First, disassociate with any current wireless network
-subprocess.Popen('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -z', shell=True)
+# Get their current MAC address
+command = 'ifconfig %s| grep ether' % (sys.argv[1])
+returnValue = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+returnValue.wait()
+
+tuple = returnValue.communicate()
+currentMAC = shlex.split(tuple[0])[1]
+
+# Chop off the last six hexadecimal digits
+currentMACPrefix = currentMAC[0:9]
+
+# Disassociate with any current wireless network
+returnValue = subprocess.Popen('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -z', shell=True)
+returnValue.wait()
 
 # Next, generate a random MAC address
 
@@ -45,11 +56,11 @@ currentTime = time.time()
 # Make it into a string
 currentTimeStr = str(int(time.time()))
 
-# Add two arbitrary values to the end, no biggie
-currentTimeStr+='64'
+# Chop off all but the last six characters
+currentTimeStr = currentTimeStr[len(currentTimeStr) - 6:len(currentTimeStr)]
 
 # Iterate through the string, building our MAC address
-MACaddress = ''
+MACaddress = currentMACPrefix
 for i, c in enumerate(currentTimeStr):
   if (i % 2) == 0:
     MACaddress+=c
@@ -63,16 +74,13 @@ MACaddress = MACaddress[0:17]
 print 'Setting new MAC address %s' % (MACaddress)
 
 # Set our MAC address to this new value
-
 command = 'sudo ifconfig %s ether %s' % (sys.argv[1], MACaddress)
-
-print command
 
 # Run the command 3 times (it seems to sometimes not stick, potential ifconfig issue?)
 
-subprocess.Popen(command, shell=True)
-time.sleep(1)
-subprocess.Popen(command, shell=True)
-time.sleep(1)
-subprocess.Popen(command, shell=True)
-
+returnValue = subprocess.Popen(command, shell=True)
+returnValue.wait()
+returnValue = subprocess.Popen(command, shell=True)
+returnValue.wait()
+returnValue = subprocess.Popen(command, shell=True)
+returnValue.wait()
